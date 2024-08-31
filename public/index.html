@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscar Producto y Agregar Nuevos</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      background-color: #f4f4f4; 
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    input[type="text"], input[type="number"] {
+      width: calc(100% - 110px);
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #data {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e9ecef;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Buscar Producto por Tipo</h1>
+    <input type="text" id="product-type" placeholder="Ingrese tipo del producto (e.g., dog, cat, fish)" />
+    <button id="fetch-button">Buscar Producto</button>
+    <div id="data"></div>
+
+    <h1>Agregar Nuevo Producto</h1>
+    <input type="text" id="new-type" placeholder="Tipo de producto (e.g., bird)" />
+    <input type="number" id="new-price" placeholder="Precio del producto (e.g., 50)" />
+    <button id="add-button">Agregar Producto</button>
+    <div id="add-result"></div>
+  </div>
+
+  <script>
+    document.getElementById('fetch-button').addEventListener('click', async () => {
+      const type = document.getElementById('product-type').value.trim();
+      if (!type) {
+        document.getElementById('data').innerText = 'Por favor, ingrese un tipo.';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/productos/${encodeURIComponent(type)}`);
+        if (response.ok) {
+          const data = await response.json();
+          document.getElementById('data').innerText = `ID: ${data.id}, Tipo: ${data.type}, Precio: $${data.price}`;
+        } else {
+          document.getElementById('data').innerText = 'Producto no encontrado';
+        }
+      } catch (error) {
+        document.getElementById('data').innerText = 'Error fetching data';
+      }
+    });
+
+    document.getElementById('add-button').addEventListener('click', async () => {
+      const type = document.getElementById('new-type').value.trim();
+      const price = parseFloat(document.getElementById('new-price').value);
+
+      if (!type || isNaN(price)) {
+        document.getElementById('add-result').innerText = 'Por favor, ingrese un tipo y un precio válidos.';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/productos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ type, price })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          document.getElementById('add-result').innerText = `Producto agregado: ID: ${data.id}, Tipo: ${data.type}, Precio: $${data.price}`;
+        } else {
+          document.getElementById('add-result').innerText = 'Error al agregar el producto';
+        }
+      } catch (error) {
+        document.getElementById('add-result').innerText = 'Error al agregar el producto';
+      }
+    });
+  </script>
+</body>
+</html>
